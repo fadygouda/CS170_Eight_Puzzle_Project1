@@ -6,7 +6,7 @@ using namespace std;
 
 class Node {
 public:
-    // Struct to represent the blank position.
+
     struct Position {
         int row;
         int col;
@@ -17,9 +17,9 @@ public:
     bool is_goal(const vector<vector<int>>& goal) const {
         return state == goal;
     }
-
     int get_heuristic() const;
     int get_total_cost() const;
+    int get_path_cost() const;
     const vector<vector<int>>& get_state() const;
 
     vector<Node*> add_child(const vector<string>& actions);
