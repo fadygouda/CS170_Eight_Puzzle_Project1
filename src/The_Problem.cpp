@@ -6,6 +6,32 @@
 
 using namespace std;
 
+
+The_Problem::The_Problem(const vector<vector<int>>& initial, const vector<vector<int>>& goal)
+    : initial(initial), goal(goal) {}
+
+const vector<vector<int>>& The_Problem::get_initial() const {
+    return initial;
+}
+
+const vector<vector<int>>& The_Problem::get_goal() const {
+    return goal;
+}
+
+void The_Problem::display_puzzle(const vector<vector<int>>& state) const {
+    for (const auto& row : state) {
+        for (int num : row) {
+            if (num == 0) {
+                cout << "* ";
+            } else {
+                cout << num << " ";
+            }
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
 string The_Problem::state_to_string(const vector<vector<int>>& state) const {
     string hash;
     for (const auto& row : state) {
@@ -100,19 +126,30 @@ Node* The_Problem::a_star_search(double (The_Problem::*heuristic)(const vector<v
                 << "Depth of the goal node was: " << current->get_path_cost() << endl;
             return current;
         }
+        explored.insert(state_to_string(current->get_state()));
+
+        vector<Node*> children = current->add_child({"UP", "DOWN", "LEFT", "RIGHT"});
+        for (Node* child : children) {
+            string child_string = state_to_string(child->get_state());
+            if (explored.find(child_string) == explored.end() && (frontier_map.find(child_string) == frontier_map.end() || frontier_map[child_string] > child->get_total_cost())) { child->heuristic = heuristic ? (this->*heuristic)(child->get_state()) : 0;
+                frontier.push(child);
+                frontier_map[child_string] = child->get_total_cost();
+            } else {
+                delete child;
+        }
     }
+    cout << "No solution found." << endl;
+    return nullptr;
 }
 
-void The_Problem::display_puzzle(const vector<vector<int>>& state) const {
-    for (const auto& row : state) {
-        for (int num : row) {
-            if (num == 0) {
-                cout << "* ";
-            } else {
-                cout << num << " ";
-            }
-        }
-        cout << endl;
-    }
-    cout << endl;
+Node* The_Problem::uniform_cost_search() {
+    return a_star_search(nullptr);
+}
+
+Node* The_Problem::misplaced_tile_a_star() {
+    return a_star_search(&Problem::misplaced_tile_heuristic);
+}
+
+Node* The_Problem::euclidean_distance_a_star() {
+    return a_star_search(&Problem::euclidean_distance_heuristic);
 }

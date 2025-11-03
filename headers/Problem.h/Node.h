@@ -7,6 +7,8 @@ using namespace std;
 class Node {
 public:
 
+
+    int heuristic;
     struct Position {
         int row;
         int col;
@@ -26,8 +28,7 @@ public:
 
 private:
     vector<vector<int>> state;
-    int path_cost;          
-    int heuristic;        
+    int path_cost;                 
     int depth;          
     string action;          
     Node* parent;        
