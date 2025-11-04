@@ -25,12 +25,12 @@ private:
     vector<vector<int>> initial;
     vector<vector<int>> goal;
 
-    struct Position {
-        int row;
-        int column;
-    };
+    // struct Position {
+    //     int row;
+    //     int column;
+    // };
 
     Node* a_star_search(double (The_Problem::*heuristic)(const vector<vector<int>>& state) const);
     string state_to_string(const vector<vector<int>>& state) const;
-    Position find_empty() const;
+    // Position find_empty() const;
 };
