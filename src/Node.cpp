@@ -10,7 +10,7 @@ Node::Node(const vector<vector<int>>&gridState,
             int pathCost, //path cost from start node aka moves so far
             int heuristicCost, //heuristic estimate to goal
             Node* parentNode,
-            const pair<int, int>& blankTile,
+            const Position& blankTile,
             const string& moveUsed): 
     grid(gridState),        //the board
     gValue(pathCost),  //g(n): cost to reach this node
@@ -45,6 +45,11 @@ bool Node::is_goal(const vector<vector<int>>&goal) const
     return grid == goal;
 }
 
+void Node::set_heuristic(int h) 
+{ 
+    hValue = h; 
+}
+
 //Expand the current node by making possible moves
 //moves is list of actions like UP, DOWN, LEFT, RIGHT
 vector<Node*> Node::add_child(const vector<string>& moves)
@@ -52,8 +57,8 @@ vector<Node*> Node::add_child(const vector<string>& moves)
     //this vector 'children' stores all the newly created child nodes
     vector<Node*> children;
     //these store where the blak tile currently is
-    int blankRow = blankPos.first;
-    int blankCol = blankPos.second;
+    int blankRow = blankPos.row;
+    int blankCol = blankPos.col;
 
     
     //go through each move (UP, DOWN, LEFT, RIGHT)
@@ -102,7 +107,8 @@ vector<Node*> Node::add_child(const vector<string>& moves)
         //this = parent pointer is the current node
         //{newRow, newCol} = new updated blank position
         //move = nots the move that made this child
-        Node* child = new Node(nextGrid, gValue + 1, 0, this, {newRow, newCol}, move);
+        Position newBlankPos = {newRow, newCol};
+        Node* child = new Node(nextGrid, gValue + 1, 0, this, newBlankPos, move);
         
         //stores child in 'children' vector
         children.push_back(child);
