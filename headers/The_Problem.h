@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "Node.h"
+#include "./Problem.h/Node.h"
 
 using namespace std;
 

@@ -1,4 +1,4 @@
-#include "The_Problem.h"
+#include "../headers/The_Problem.h"
 #include <queue>
 #include <iostream>
 #include <cmath>
