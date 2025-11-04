@@ -15,6 +15,11 @@ public:
 
     //Node(const vector<vector<int>>& game_state, int path_cost, int heuristicCost, Node* parent, const Position& blank_position, const string& chosen_action) : state(game_state), path_cost(path_cost), heuristic(heuristicCost), parent(parent), blank_pos(blank_position), action(chosen_action), depth(0) {} 
 
+    const Node* get_parent() const {return parent;}
+    const std::string& get_move() const {return moveMade;}
+    const Position& get_blank_pos() const {return blankPos;}
+
+    
     Node (const vector<vector<int>>& gridState,
     int pathCost,
     int heuristicCost,
@@ -35,6 +40,8 @@ public:
     vector<Node*> add_child(const vector<string>& moves);
     
     void set_heuristic(int h);
+
+
 
 private:
     vector<vector<int>> grid;//Layout of the puzzle

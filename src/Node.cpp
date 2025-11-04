@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "../headers/Problem.h/Node.h"
 #include <iostream>
 #include <cmath>
 #include <utility>
