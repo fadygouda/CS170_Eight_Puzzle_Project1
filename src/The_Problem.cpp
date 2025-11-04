@@ -3,9 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include <unordered_set>
-
+#include <unordered_map>
 using namespace std;
-
 
 The_Problem::The_Problem(const vector<vector<int>>& initial, const vector<vector<int>>& goal)
     : initial(initial), goal(goal) {}
@@ -57,14 +56,12 @@ double The_Problem::heuristic_misplaced_tiles(const vector<vector<int>>& state) 
 double The_Problem::heuristic_euclidean_distance(const vector<vector<int>>& state) const {
     double distance = 0.0;
     int dim = state.size();
-
     for (int i = 0; i < state.size(); ++i) {
         for (unsigned j = 0; j < state[i].size(); ++j) {
             int tile = state[i][j]; 
             if (tile != 0) {
                 int target_x = (tile - 1) / dim;
                 int target_y = (tile - 1) % dim;
-
                 distance += std::sqrt((i - target_x) * (i - target_x) + (j - target_y) * (j - target_y));
             }
         }
@@ -79,13 +76,11 @@ struct CompareNode {
 };
 
 Node* The_Problem::a_star_search(double (The_Problem::*heuristic)(const vector<vector<int>>& state) const){
-
     priority_queue<Node*, vector<Node*>, CompareNode> frontier;
     unordered_set<string> explored;
     unordered_map<string, int> frontier_map;
-
-    Node::Position blank_pos = {-1, -1};
-
+    
+    pair<int, int> blank_pos = {-1, -1};
     for (int i = 0; i < initial.size(); ++i) {
         for (int j = 0; j < initial[i].size(); ++j) {
             if (initial[i][j] == 0) {
@@ -93,51 +88,65 @@ Node* The_Problem::a_star_search(double (The_Problem::*heuristic)(const vector<v
                 break;
             }
         }
-        if (blank_pos.row != -1) break;
+        if (blank_pos.first != -1) break;
     }
 
     int initial_h = heuristic ? (this->*heuristic)(initial) : 0;
     Node* start = new Node(initial, 0, initial_h, nullptr, blank_pos, "");
     frontier.push(start);
     frontier_map[state_to_string(initial)] = start->get_total_cost();
-
+    
     cout << "Initial heuristic: " << initial_h << endl;
-
+    
     int nodes_expanded = 0, max_queue_size = 0;
-
+    
     while (!frontier.empty()) {
         Node* current = frontier.top();
         frontier.pop();
         frontier_map.erase(state_to_string(current->get_state()));
-
+        
         ++nodes_expanded;
         max_queue_size = max(max_queue_size, (int)frontier.size());
-
+        
         cout << "Expanding state:\n";
         display_puzzle(current->get_state());
         cout << "g(n) = " << current->get_path_cost()
-            << ", h(n) = " << current->get_heuristic()
-            << ", f(n) = " << current->get_total_cost() << "\n\n";
-
+             << ", h(n) = " << current->get_heuristic()
+             << ", f(n) = " << current->get_total_cost() << "\n\n";
+        
         if (current->is_goal(goal)) {
             cout << "Goal!!!\n"
-                << "Total nodes expanded: " << nodes_expanded << "\n"
-                << "Maximum queue size at any one time: " << max_queue_size << "\n"
-                << "Depth of the goal node was: " << current->get_path_cost() << endl;
+                 << "Total nodes expanded: " << nodes_expanded << "\n"
+                 << "Maximum queue size at any one time: " << max_queue_size << "\n"
+                 << "Depth of the goal node was: " << current->get_path_cost() << endl;
             return current;
         }
+        
         explored.insert(state_to_string(current->get_state()));
-
         vector<Node*> children = current->add_child({"UP", "DOWN", "LEFT", "RIGHT"});
+        
         for (Node* child : children) {
             string child_string = state_to_string(child->get_state());
-            if (explored.find(child_string) == explored.end() && (frontier_map.find(child_string) == frontier_map.end() || frontier_map[child_string] > child->get_total_cost())) { child->heuristic = heuristic ? (this->*heuristic)(child->get_state()) : 0;
-                frontier.push(child);
-                frontier_map[child_string] = child->get_total_cost();
+            
+            if (explored.find(child_string) == explored.end() && 
+                (frontier_map.find(child_string) == frontier_map.end() || 
+                 frontier_map[child_string] > child->get_total_cost())) {
+                
+                // Create new node with correct heuristic instead of modifying
+                int child_h = heuristic ? (this->*heuristic)(child->get_state()) : 0;
+                Node* new_child = new Node(child->get_state(), child->get_path_cost(), 
+                                           child_h, current, 
+                                           {-1, -1}, "");  // blank_pos will be recalculated if needed
+                delete child;
+                
+                frontier.push(new_child);
+                frontier_map[child_string] = new_child->get_total_cost();
             } else {
                 delete child;
+            }
         }
     }
+    
     cout << "No solution found." << endl;
     return nullptr;
 }
@@ -147,9 +156,9 @@ Node* The_Problem::uniform_cost_search() {
 }
 
 Node* The_Problem::misplaced_tile_a_star() {
-    return a_star_search(&Problem::misplaced_tile_heuristic);
+    return a_star_search(&The_Problem::heuristic_misplaced_tiles);  // Fixed class and method name
 }
 
 Node* The_Problem::euclidean_distance_a_star() {
-    return a_star_search(&Problem::euclidean_distance_heuristic);
+    return a_star_search(&The_Problem::heuristic_euclidean_distance);  // Fixed class and method name
 }
